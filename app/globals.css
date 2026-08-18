@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+/*
+  AfriLingo — design tokens.
+  Palette africaine (terre / ocre / or / jade profond / terracotta) sur base sombre.
+  Tailwind v4 CSS-first : aucun tailwind.config.js. Les tokens @theme génèrent
+  les utilitaires (bg-terre, text-or, font-nko, etc.).
+*/
+@theme {
+  /* Fonds sombres */
+  --color-ink: #0a0a12;
+  --color-ink-2: #11111c;
+  --color-surface: #161624;
+  --color-surface-2: #1e1e30;
+  --color-surface-3: #262640;
+  --color-line: #2a2a40;
+
+  /* Texte */
+  --color-cream: #f4ead6;
+  --color-sand: #d8cfb8;
+  --color-muted: #9a9ab4;
+
+  /* Accents africains */
+  --color-terre: #c0703f; /* terracotta / terre */
+  --color-terre-2: #d9854a;
+  --color-ocre: #d4a24c; /* ocre */
+  --color-gold: #f2c14e; /* or */
+  --color-gold-2: #f6d365;
+  --color-jade: #3aa67a; /* vert profond */
+  --color-jade-2: #2c7a5b;
+  --color-rose: #e0706b;
+  --color-violet: #8b5cf6; /* focus, conservé du baseline */
+
+  /* États */
+  --color-ok: #34d399;
+  --color-bad: #f87171;
+
+  /* Polices */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  --font-nko: "Noto Sans NKo", "Ebrima", "Noto Sans NKo Regular", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+/* Police N'Ko auto-hébergée — codepoints U+07C0–U+07FF uniquement.
+   unicode-range garantit que le Latin/Français reste sur Inter. */
+@font-face {
+  font-family: "Noto Sans NKo";
+  src: url("/fonts/NotoSansNKo-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+07C0-07FF;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--color-ink);
+    color: var(--color-cream);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overscroll-behavior-y: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-violet);
+    outline-offset: 2px;
+  }
+
+  /* Empêche la sélection involontaire sur les boutons (UX app-like). */
+  button {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Respect des préférences de mouvement réduit. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Fond texturé subtil (halo doré en haut, façon textile bazin/kente). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(242, 193, 78, 0.08), transparent 60%),
+    radial-gradient(90% 50% at 50% 110%, rgba(58, 166, 122, 0.06), transparent 60%);
+}
+
+/* Scrollbar discrète. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-3);
+  border-radius: 99px;
+}
