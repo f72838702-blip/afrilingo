@@ -46,3 +46,5 @@ next-env.d.ts
 # audio : seuls les placeholders/docs sont commités, pas les enregistrements réels
 /public/audio/**/*.webm
 /public/audio/**/*.mp3
+
+.vercel

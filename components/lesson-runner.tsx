@@ -116,13 +116,16 @@ export function LessonRunner({ lessonId }: { lessonId: string }) {
   return (
     <div className="mx-auto max-w-md px-4 pb-32 pt-4">
       {/* Header : progression + cœurs + fermer */}
-      <div className="flex items-center gap-3 pb-4">
+      <div className="flex items-center gap-3 pb-1">
         <Link href="/" aria-label="Quitter la leçon" className="text-muted hover:text-cream">
           <X className="h-6 w-6" />
         </Link>
         <ExerciseProgressBar current={index} total={exercises.length} />
         <Hearts hearts={progress.hearts} />
       </div>
+      <p className="mb-3 text-center text-[11px] font-medium text-muted">
+        Exercice {Math.min(index + 1, exercises.length)} / {exercises.length}
+      </p>
 
       {/* Burst XP */}
       <div className="relative">
