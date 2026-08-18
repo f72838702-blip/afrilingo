@@ -19,6 +19,7 @@ import { leagueForXp, DEFAULT_LEAGUE_ID } from "@/data/leagues";
 
 export const DEFAULT_PROGRESS: Progress = {
   version: PROGRESS_VERSION,
+  displayName: "Apprenant N'Ko",
   totalXp: 0,
   hearts: MAX_HEARTS,
   lastHeartRegenAt: 0,
@@ -194,6 +195,15 @@ export function setTranslitMode(mode: TranslitMode): void {
   const p = getSnapshot();
   if (p.translitMode === mode) return;
   commit({ ...p, translitMode: mode });
+}
+
+/** Modifie le nom affiché (profil). Vide → retombe sur le défaut. */
+export function setDisplayName(name: string): void {
+  const p = getSnapshot();
+  const trimmed = name.trim();
+  const next = trimmed.length > 0 ? trimmed.slice(0, 40) : DEFAULT_PROGRESS.displayName;
+  if (p.displayName === next) return;
+  commit({ ...p, displayName: next });
 }
 
 export function dismissInstall(): void {

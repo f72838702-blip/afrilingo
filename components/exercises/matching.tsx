@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import type { MatchingExercise } from "@/types";
 import { validateAnswer, shuffle, type MatchingAnswer } from "@/lib/exercise-engine";
 import { Button } from "../ui/button";
+import { AudioPlayer } from "../audio-player";
 import { Nko, Lat } from "../direction-text";
 import { cn } from "@/lib/format";
 
@@ -70,7 +71,12 @@ export function Matching({
                 )}
               >
                 {p.left.nko ? (
-                  <Nko className="text-xl font-semibold">{p.left.nko}</Nko>
+                  <span className="flex items-center justify-center gap-2">
+                    <Nko className="text-xl font-semibold">{p.left.nko}</Nko>
+                    {p.left.audio && (
+                      <AudioPlayer audioId={p.left.audio} label="Écouter" size="sm" />
+                    )}
+                  </span>
                 ) : (
                   <Lat className="text-base font-semibold">{p.left.latin}</Lat>
                 )}

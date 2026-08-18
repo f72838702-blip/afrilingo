@@ -148,6 +148,8 @@ export type BadgeId =
 
 export interface Progress {
   version: number;
+  /** Nom affiché (modifiable, défaut "Apprenant N'Ko"). */
+  displayName: string;
   totalXp: number;
   hearts: number;
   lastHeartRegenAt: number; // epoch ms

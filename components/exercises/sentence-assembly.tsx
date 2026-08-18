@@ -12,6 +12,7 @@ import {
   type SentenceAssemblyAnswer,
 } from "@/lib/exercise-engine";
 import { Button } from "../ui/button";
+import { AudioPlayer } from "../audio-player";
 import { cn } from "@/lib/format";
 
 export function SentenceAssembly({
@@ -50,12 +51,21 @@ export function SentenceAssembly({
         <p className="text-center text-sm text-muted">{exercise.prompt.fr}</p>
       )}
 
-      {/* Cible attendue (aperçu) */}
-      {exercise.target.fr && (
-        <p className="text-center text-base font-semibold text-cream">
-          « {exercise.target.fr} »
-        </p>
-      )}
+      {/* Cible attendue (aperçu) + bouton écouter si audio dispo */}
+      <div className="flex items-center justify-center gap-2">
+        {exercise.target.fr && (
+          <p className="text-center text-base font-semibold text-cream">
+            « {exercise.target.fr} »
+          </p>
+        )}
+        {exercise.target.audio && (
+          <AudioPlayer
+            audioId={exercise.target.audio}
+            label="Écouter la phrase cible"
+            size="sm"
+          />
+        )}
+      </div>
 
       {/* Ligne réponse (dir = direction de l'exercice) */}
       <div

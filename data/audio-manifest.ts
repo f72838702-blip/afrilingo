@@ -44,3 +44,8 @@ export function getAudio(id: string): AudioEntry {
   if (!e) throw new Error(`Audio manquant dans le manifest : ${id}`);
   return e;
 }
+
+/** Variante sûre (null si absent) — utilisée par l'UI pour ne pas planter. */
+export function getAudioEntry(id: string): AudioEntry | null {
+  return AUDIO_MANIFEST[id] ?? null;
+}
