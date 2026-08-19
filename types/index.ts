@@ -161,6 +161,8 @@ export interface Progress {
   translitMode: TranslitMode;
   leagueId: string;
   installDismissed: boolean;
+  /** Index de la leçon en cours (0 = première leçon du cours phare). */
+  currentLessonIndex: number;
 }
 
 export interface Badge {

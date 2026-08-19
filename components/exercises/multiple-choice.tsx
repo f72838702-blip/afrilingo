@@ -34,9 +34,19 @@ export function MultipleChoice({
             <AudioPlayer audioId={exercise.question.audio} label="Écouter la question" size="lg" />
           </div>
         )}
-        <p className="text-lg font-semibold text-cream">
-          {exercise.question.fr ?? exercise.question.latin ?? exercise.question.nko}
-        </p>
+        {exercise.question.nko ? (
+          // Question en N'Ko : grand, RTL, police Noto Sans NKo / Ebrima.
+          <Dual
+            nko={exercise.question.nko}
+            latin={exercise.question.latin}
+            fr={exercise.question.fr}
+            size="lg"
+          />
+        ) : (
+          <p className="text-lg font-semibold text-cream">
+            {exercise.question.fr ?? exercise.question.latin ?? exercise.question.nko}
+          </p>
+        )}
         {exercise.question.audio && !exercise.audioFirst && (
           <div className="mt-2 flex justify-center">
             <AudioPlayer audioId={exercise.question.audio} label="Écouter" />
@@ -74,7 +84,7 @@ export function MultipleChoice({
                 nko={o.text.nko}
                 latin={o.text.latin}
                 fr={o.text.fr}
-                size="md"
+                size="lg"
                 className="!flex-row !items-center !gap-3"
               />
               {o.text.audio && (

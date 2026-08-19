@@ -14,7 +14,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4 (CSS-first, **pas de `tailwind.config.js`** ; tokens dans `app/globals.css` via `@theme`) + framer-motion + lucide-react. Alias `@/*` → racine. npm. Pas de `src/`.
 
 ## Architecture
-**Local-first, AUCUN backend.** Pas de Supabase/DB/auth. Les données de cours sont en TS dans `data/` (chargées via `lib/course-loader.ts` en style repository — interface conçue pour brancher Supabase plus tard sans refactor, mais non implémenté). La progression est en `localStorage` (`lib/progress-store.ts`, clé `afrilingo:progress:v1`).
+**Local-first, AUCUN backend.** Pas de Supabase/DB/auth. Les données de cours sont en TS dans `data/` (chargées via `lib/course-loader.ts` en style repository — interface conçue pour brancher Supabase plus tard sans refactor, mais non implémenté). La progression est gérée par **Zustand** (`store/useUserStore.ts`, persist localStorage, clé `afrilingo:progress:v2`) ; `lib/progress-store.ts` est un **adaptateur fin** qui ré-exporte l'API publique (useProgress, completeLesson, loseHeart, resetProgress, etc.) pour que les composants n'aient pas à changer. Réhydration explicite dans `ProgressProvider` (`skipHydration: true` → SSR-safe) + sync cross-tab via l'événement `storage`.
 
 ## N'Ko & RTL
 - Le N'Ko (Unicode U+07C0–U+07FF) s'écrit **RTL**. Le chrome de l'app reste LTR français ; seuls les blocs de contenu N'Ko passent en `dir="rtl"` via le composant `<Nko>` (`components/direction-text.tsx`).
@@ -22,7 +22,7 @@ Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4 (CSS-first, **pas 
 - Unicode N'Ko : **chiffres en début de bloc** (U+07C0–U+07C9), diacritiques tonaux U+07EB–U+07F3. La comparaison tolérante aux tons strippe U+07EB–U+07F3 (`lib/exercise-engine.ts`).
 
 ## Audio
-Aucun fichier audio binaire commité. `lib/audio.ts` synthétise : FR via `speechSynthesis` (lang fr-FR), N'Ko via ton Web Audio + lecture de la translittération Latin (aucun TTS N'Ko n'existe). `data/audio-manifest.ts` = source de vérité ; setter `url` → l'app utilise le fichier réel (`public/audio/nko/`). **iOS** : `speechSynthesis` doit être déclenché par un user gesture (les boutons le sont) — ne jamais auto-play.
+Aucun fichier audio binaire commité. **N'Ko : lecture HTML5 `new Audio('/audio/nko/…')` via `<AudioPlayer>` — AUCUNE synthèse vocale pour le N'Ko** (consigne projet). Si le fichier manque/échoue, `<AudioPlayer>` joue une animation d'onde visuelle sans bloquer l'UI ni générer d'erreur console (on n'arme pas `new Audio` tant qu'aucun `url` n'est déclaré → pas de 404 network). Bouton « Vitesse lente (0,75x) ». FR (consignes) : `speechSynthesis` fr-FR autorisé (best-effort). SFX leçon (succès/échec) : ton Web Audio court dans `lib/audio.ts` `playSfx()`. `data/audio-manifest.ts` = source de vérité ; setter `url` → l'app utilise le fichier réel (`public/audio/nko/`). **iOS** : `speechSynthesis`/`AudioContext` doivent être déclenchés par un user gesture (les boutons le sont) — ne jamais auto-play.
 
 ## PWA
 Service worker **hand-written** `public/sw.js` (pas de `next-pwa` — incompatible Next 16/Turbopack). Enregistré par `components/service-worker-register.tsx`, **gated** `NODE_ENV==="production" || ?sw=1` (dev reste SW-free pour éviter le cache stale). Pour tester l'offline en dev : ajouter `?sw=1` à l'URL. Cache-first pour `/audio/*`, SWR pour l'app shell.

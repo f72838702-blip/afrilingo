@@ -118,3 +118,14 @@ body::before {
   background: var(--color-surface-3);
   border-radius: 99px;
 }
+
+/* Animation d'onde pour le feedback audio (AudioPlayer sans fichier / lecture). */
+@keyframes nko-wave {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}

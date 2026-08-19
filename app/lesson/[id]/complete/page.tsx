@@ -98,15 +98,21 @@ export default function CompletePage() {
 
         {/* CTA */}
         <div className="flex w-full flex-col gap-2">
+          <Button
+            variant="primary"
+            size="lg"
+            fullWidth
+            onClick={() => router.push("/")}
+          >
+            Continuer <ArrowRight className="h-5 w-5" />
+          </Button>
           {next ? (
-            <Button
-              variant="primary"
-              size="lg"
-              fullWidth
+            <button
               onClick={() => router.push(`/lesson/${next.id}`)}
+              className="text-center text-sm font-semibold text-terre hover:underline"
             >
-              Leçon suivante <ArrowRight className="h-5 w-5" />
-            </Button>
+              Ou passer à la leçon suivante&nbsp;: {next.title}
+            </button>
           ) : (
             <div className="rounded-2xl border border-gold/40 bg-gold/10 p-4 text-sm text-gold">
               🏆 Module terminé ! Tu maîtrises les salutations en N&apos;Ko.
@@ -114,7 +120,7 @@ export default function CompletePage() {
           )}
           <Link
             href="/"
-            className="text-center text-sm font-semibold text-terre hover:underline"
+            className="text-center text-sm font-semibold text-muted hover:underline"
           >
             Retour à l&apos;accueil
           </Link>

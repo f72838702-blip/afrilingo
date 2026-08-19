@@ -8,6 +8,7 @@ import { X } from "lucide-react";
 import type { Exercise } from "@/types";
 import { getLesson, FLAGSHIP_COURSE_ID } from "@/lib/course-loader";
 import { warmLessonAudio } from "@/lib/audio-cache";
+import { playSfx, warmAudioContext } from "@/lib/audio";
 import {
   addXp,
   awardBadge,
@@ -65,6 +66,11 @@ export function LessonRunner({ lessonId }: { lessonId: string }) {
   const current = exercises[index];
 
   const handleResult = (correct: boolean) => {
+    // Feedback sonore (Web Audio) : succès (deux notes) / échec (note grave).
+    // Déclenché par le clic utilisateur → OK iOS.
+    warmAudioContext();
+    playSfx(correct ? "correct" : "wrong");
+
     if (correct) {
       addXp(XP_PER_CORRECT);
       awardBadge("first_word");
