@@ -16,6 +16,13 @@ Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4 (CSS-first, **pas 
 ## Architecture
 **Local-first, AUCUN backend.** Pas de Supabase/DB/auth. Les données de cours sont en TS dans `data/` (chargées via `lib/course-loader.ts` en style repository — interface conçue pour brancher Supabase plus tard sans refactor, mais non implémenté). La progression est gérée par **Zustand** (`store/useUserStore.ts`, persist localStorage, clé `afrilingo:progress:v2`) ; `lib/progress-store.ts` est un **adaptateur fin** qui ré-exporte l'API publique (useProgress, completeLesson, loseHeart, resetProgress, etc.) pour que les composants n'aient pas à changer. Réhydration explicite dans `ProgressProvider` (`skipHydration: true` → SSR-safe) + sync cross-tab via l'événement `storage`.
 
+## Cours (multi-cours illimité)
+- **Registre** : `data/courses/index.ts` = `COURSES_REGISTRY: Course[]`. **Pour ajouter un cours : crée `data/courses/<id>.ts` (exporte un `Course`) + ajoute-le au tableau. AUCUNE autre modification** — le catalogue home, le skill-tree, les leçons et la progression le prennent en charge automatiquement.
+- `lib/course-loader.ts` : `allCourses()`, `getCourse(id)`, `getLessonChain(id)`, `getNextLesson(id, lessonId)`, `findCourseByLessonId(lessonId)` (reverse-lookup, car le routage est `/lesson/[id]` sans cours dans l'URL). `FLAGSHIP_COURSE_ID` = 1er cours du registre (défaut, peu utilisé).
+- **Contraintes** : `course_id` unique ; ids de leçons **globalement uniques** (tous cours confondus, car `completedLessons` est un flat `string[]` et `/lesson/[id]` résout le cours par id de leçon).
+- **Routes** : `/` = catalogue de cours (cartes avec progression) ; `/course/[courseId]` = skill tree du cours ; `/lesson/[id]` = leçon (résout le cours via `findCourseByLessonId`) ; `/lesson/[id]/complete` = fin.
+- **Progression multi-cours** : `completedLessons` (flat, ids uniques) marche pour N cours. L'index de leçon courante est **dérivé par cours** dans `skill-tree` (première leçon non complétée de la chaîne du cours) — plus de `currentLessonIndex` stocké. `evaluateBadges` parcourt **tous** les cours (griot_mande = un module 100% dans n'importe quel cours).
+
 ## N'Ko & RTL
 - Le N'Ko (Unicode U+07C0–U+07FF) s'écrit **RTL**. Le chrome de l'app reste LTR français ; seuls les blocs de contenu N'Ko passent en `dir="rtl"` via le composant `<Nko>` (`components/direction-text.tsx`).
 - Police auto-hébergée : `@font-face` dans `globals.css` pointant vers `public/fonts/NotoSansNKo-Regular.ttf` (OFL). **NE PAS** utiliser `next/font/google` pour le N'Ko (subset latin, build-time fetch casse). `unicode-range: U+07C0-07FF` → le Latin reste sur Inter.
