@@ -12,7 +12,9 @@ export const FR_NKO_NUMBERS_COURSE: Course = {
   target_language: "nko",
   target_script_direction: "rtl",
   title: "N'Ko — Nombres & Chiffres",
-  title_nko: "ߢߌߦߊ",
+  // Pas de title_nko : la traduction vérifiée en N'Ko n'est pas disponible.
+  // On évite d'inventer des glyphes (consigne projet) ; le titre FR + les chiffres
+  // N'Ko (߀ à ߉) dans les leçons suffisent.
   description:
     "Apprends à lire, écrire et reconnaître les chiffres N'Ko (߀ à ߉), de zéro à neuf.",
   modules: [
