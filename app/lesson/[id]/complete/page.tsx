@@ -13,7 +13,7 @@ import { BADGES_BY_ID } from "@/data/badges";
 import { BadgeCard } from "@/components/badge-card";
 import { Button } from "@/components/ui/button";
 import { Nko, Lat } from "@/components/direction-text";
-import { getNextLesson, FLAGSHIP_COURSE_ID } from "@/lib/course-loader";
+import { getNextLesson, findCourseByLessonId } from "@/lib/course-loader";
 
 export default function CompletePage() {
   const params = useParams<{ id: string }>();
@@ -31,7 +31,9 @@ export default function CompletePage() {
   const lastBadge = progress.badges[progress.badges.length - 1];
   const badge = lastBadge ? BADGES_BY_ID[lastBadge] : null;
 
-  const next = id ? getNextLesson(FLAGSHIP_COURSE_ID, id) : null;
+  // Résout le cours propriétaire de la leçon (multi-cours) pour trouver la suite.
+  const course = id ? findCourseByLessonId(id) : null;
+  const next = id && course ? getNextLesson(course.course_id, id) : null;
 
   return (
     <div className="mx-auto max-w-md px-4 pb-16 pt-10">

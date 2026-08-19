@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { X } from "lucide-react";
 import type { Exercise } from "@/types";
-import { getLesson, FLAGSHIP_COURSE_ID } from "@/lib/course-loader";
+import { findCourseByLessonId, getLesson } from "@/lib/course-loader";
 import { warmLessonAudio } from "@/lib/audio-cache";
 import { playSfx, warmAudioContext } from "@/lib/audio";
 import {
@@ -34,7 +34,9 @@ export function LessonRunner({ lessonId }: { lessonId: string }) {
   const burstTimer = useRef<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
 
-  const lesson = getLesson(FLAGSHIP_COURSE_ID, lessonId);
+  // Résout le cours propriétaire de la leçon (routage par id de leçon, multi-cours).
+  const course = findCourseByLessonId(lessonId);
+  const lesson = course ? getLesson(course.course_id, lessonId) : null;
 
   // Rejouer une leçon déjà terminée ? (pas d'XP par bonne réponse pour éviter
   // le farming infini — la complétion finale est aussi no-op côté XP dans le store).

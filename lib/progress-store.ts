@@ -99,10 +99,6 @@ export function dismissInstall(): void {
   useUserStore.getState().dismissInstall();
 }
 
-export function setCurrentLessonIndex(index: number): void {
-  useUserStore.getState().setCurrentLessonIndex(index);
-}
-
 // ---- Re-exports pour les consommateurs qui importent ces symboles ----
 
 export { DEFAULT_PROGRESS, regenHearts };

@@ -40,7 +40,6 @@ export const DEFAULT_PROGRESS: Progress = {
   translitMode: "nko+latin",
   leagueId: DEFAULT_LEAGUE_ID,
   installDismissed: false,
-  currentLessonIndex: 0,
   activeDates: [],
 };
 
@@ -76,8 +75,6 @@ export interface UserState extends Progress {
   setTranslitMode: (mode: TranslitMode) => void;
   dismissInstall: () => void;
   tickHearts: () => void;
-  /** Définit l'index de leçon en cours (pour le surlignage sur l'accueil). */
-  setCurrentLessonIndex: (index: number) => void;
 }
 
 // ---- Store Zustand ----
@@ -124,8 +121,6 @@ export const useUserStore = create<UserState>()(
           longestStreak: Math.max(p.longestStreak, st.streakDays),
           totalXp,
           leagueId: leagueForXp(totalXp),
-          // L'index courant avance à la prochaine leçon non complétée.
-          currentLessonIndex: completedLessons.length,
           activeDates,
         };
         set(next);
@@ -180,12 +175,6 @@ export const useUserStore = create<UserState>()(
         const regen = regenHearts(p, Date.now());
         if (regen !== p) set(regen);
       },
-
-      setCurrentLessonIndex: (index) => {
-        const p = get();
-        if (p.currentLessonIndex === index) return;
-        set({ currentLessonIndex: index });
-      },
     }),
     {
       name: PROGRESS_STORAGE_KEY,
@@ -214,7 +203,6 @@ export const useUserStore = create<UserState>()(
           setTranslitMode: _t,
           dismissInstall: _i,
           tickHearts: _h,
-          setCurrentLessonIndex: _s,
           ...data
         } = s;
         return data;

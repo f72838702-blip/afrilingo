@@ -19,13 +19,13 @@ export const BADGES: Badge[] = [
   {
     id: "module_1_done",
     name: "Première leçon",
-    description: "Termine ta première leçon du module Salutations.",
+    description: "Termine ta première leçon (n'importe quel cours).",
     icon: "BookOpen",
   },
   {
     id: "griot_mande",
     name: "Griot Mandé",
-    description: "Complète tout le module Salutations & Courtoisie.",
+    description: "Complète un module entier (n'importe quel cours).",
     icon: "Crown",
   },
   {
