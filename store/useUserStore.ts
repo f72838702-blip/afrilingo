@@ -20,7 +20,7 @@ import {
   PROGRESS_VERSION,
   XP_PER_LESSON,
 } from "@/lib/constants";
-import { nextStreak } from "@/lib/streak";
+import { nextStreak, todayKey } from "@/lib/streak";
 import { leagueForXp, DEFAULT_LEAGUE_ID } from "@/data/leagues";
 import { newlyEarnedBadges } from "@/lib/badges";
 
@@ -41,6 +41,7 @@ export const DEFAULT_PROGRESS: Progress = {
   leagueId: DEFAULT_LEAGUE_ID,
   installDismissed: false,
   currentLessonIndex: 0,
+  activeDates: [],
 };
 
 // ---- Helpers purs (régénération de cœurs) ----
@@ -54,8 +55,10 @@ export function regenHearts(p: Progress, now: number): Progress {
   const gained = Math.floor(elapsed / HEART_REGEN_MS);
   if (gained <= 0) return p;
   const hearts = Math.min(MAX_HEARTS, p.hearts + gained);
-  const consumed = (gained * HEART_REGEN_MS) % HEART_REGEN_MS;
-  const lastHeartRegenAt = now - consumed;
+  // Préserve la progression PARTIELLE vers le prochain cœur : on avance
+  // lastHeartRegenAt du temps réellement consommé (gained * HEART_REGEN_MS),
+  // pas jusqu'à `now` — sinon on perd le reste (< 5h) à chaque tick.
+  const lastHeartRegenAt = (p.lastHeartRegenAt || 0) + gained * HEART_REGEN_MS;
   return { ...p, hearts, lastHeartRegenAt };
 }
 
@@ -86,14 +89,27 @@ export const useUserStore = create<UserState>()(
 
       completeLesson: (lessonId, xpGained) => {
         const p = get();
-        // Rejouer une leçon déjà faite : on étend juste le streak, pas de double XP.
+        const today = todayKey();
+        // Marque le jour comme actif (historique cumulé pour le calendrier de série
+        // et l'objectif quotidien). Dédup : on ne pousse pas si déjà présent.
+        const activeDates = p.activeDates.includes(today)
+          ? p.activeDates
+          : [...p.activeDates, today];
+        // Rejouer une leçon déjà faite : on étend juste le streak + jour actif,
+        // pas de double XP ni de re-complétion.
         if (p.completedLessons.includes(lessonId)) {
           const st = nextStreak(p.lastActiveDate, p.streakDays);
-          if (st.streakDays === p.streakDays && st.lastActiveDate === p.lastActiveDate) return;
+          if (
+            st.streakDays === p.streakDays &&
+            st.lastActiveDate === p.lastActiveDate &&
+            activeDates === p.activeDates
+          )
+            return;
           set({
             streakDays: st.streakDays,
             lastActiveDate: st.lastActiveDate,
             longestStreak: Math.max(p.longestStreak, st.streakDays),
+            activeDates,
           });
           return;
         }
@@ -110,6 +126,7 @@ export const useUserStore = create<UserState>()(
           leagueId: leagueForXp(totalXp),
           // L'index courant avance à la prochaine leçon non complétée.
           currentLessonIndex: completedLessons.length,
+          activeDates,
         };
         set(next);
         // Badges dérivés (griot_mande si module fini, streak_7 si ≥7j).

@@ -1,12 +1,12 @@
 // AfriLingo — bouton lecteur audio réutilisable.
-//  • N'Ko : HTML5 `new Audio('/audio/nko/…')` (le `url` du manifest). AUCUNE
-//    synthèse vocale pour le N'Ko (consigne projet). Si le fichier manque ou
-//    échoue, on joue une animation d'onde visuelle temporaire — sans bloquer
-//    l'UI ni générer d'erreur console (on n'arme pas `new Audio` tant qu'aucun
-//    fichier n'est déclaré, pour éviter les 404 network).
-//  • FR (consignes) : speechSynthesis fr-FR autorisé (fallback) — pas concerné
-//    par l'interdiction qui vise le N'Ko.
-//  • Bouton « Vitesse lente (0.75x) » : ralentit la lecture (playbackRate ou rate).
+//  • N'Ko : priorité au fichier réel HTML5 (le `url` du manifest). En ATTENTE des
+//    vrais enregistrements, fallback audible gratuit/offline : speechSynthesis
+//    lit la translittération Latin du mot (voix fr-FR, approximation honnête).
+//    Si le fichier échoue (404/offline), on retombe aussi sur ce fallback. On
+//    n'arme `new Audio` que si `url` est déclaré → pas de 404 network inutile.
+//  • FR (consignes) : speechSynthesis fr-FR (fallback si pas de fichier).
+//  • Bouton « Vitesse lente (0.75x) » : ralentit la lecture (playbackRate fichier
+//    ou rate speechSynthesis).
 // Déclenché par user gesture (OK iOS).
 
 "use client";
@@ -81,16 +81,20 @@ export function AudioPlayer({
       return;
     }
 
-    // FR (consigne) : speechSynthesis autorisée.
+    // FR (consigne) sans fichier : speechSynthesis lit le texte FR.
     if (isFr && !hasFile) {
       speakFr(entry.fr ?? entry.latin ?? "", slow);
       runVisualFeedback();
       return;
     }
 
-    // N'Ko sans fichier : PAS de synthèse (consigne). Feedback visuel seulement.
+    // N'Ko sans fichier : fallback audible — speechSynthesis lit la
+    // translittération Latin (voix fr-FR). Approximation honnête en attendant
+    // les vrais enregistrements (aucun TTS N'Ko/Bambara public côté client).
     // On n'arme pas `new Audio` → aucun 404 network, aucune erreur console.
     if (!hasFile) {
+      const latin = entry.latin;
+      if (latin) speakFr(latin, slow);
       runVisualFeedback();
       return;
     }
@@ -109,9 +113,15 @@ export function AudioPlayer({
     a.onended = () => setState("idle");
     a.onpause = () => setState("idle");
     a.onerror = () => {
-      // Fichier injoignable (404/offline) → feedback visuel, pas d'erreur console
-      // (on ne relance pas la synthèse N'Ko : interdit par la consigne).
-      runVisualFeedback();
+      // Fichier injoignable (404/offline) → fallback audible si on a la
+      // translittération Latin, sinon feedback visuel seul. Pas d'erreur console.
+      const latin = entry.latin;
+      if (latin) {
+        speakFr(latin, slow);
+        runVisualFeedback();
+      } else {
+        runVisualFeedback();
+      }
     };
 
     setState("loading");

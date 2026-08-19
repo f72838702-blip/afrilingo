@@ -75,7 +75,9 @@ export default function ProfilePage() {
           <h2 className="mb-3 text-sm font-bold text-cream">7 derniers jours</h2>
           <div className="flex justify-between gap-2">
             {week.map((day) => {
-              const active = progress.lastActiveDate === day;
+              // Historique cumulé des jours actifs (pas seulement le streak
+              // courant) → plusieurs jours peuvent être surlignés.
+              const active = progress.activeDates.includes(day);
               const d = new Date(day);
               const label = ["D", "L", "M", "M", "J", "V", "S"][d.getDay()];
               return (

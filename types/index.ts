@@ -163,6 +163,10 @@ export interface Progress {
   installDismissed: boolean;
   /** Index de la leçon en cours (0 = première leçon du cours phare). */
   currentLessonIndex: number;
+  /** Jours (clés "YYYY-MM-DD") où au moins une leçon a été complétée.
+   *  Sert au calendrier de série (profil) et à l'objectif quotidien (accueil).
+   *  Historique cumulé (pas seulement le streak courant). */
+  activeDates: string[];
 }
 
 export interface Badge {

@@ -10,18 +10,25 @@ import { Lock } from "lucide-react";
 /** Décalage horizontal sinusoïdal pour un chemin sinueux (style Duolingo). */
 const OFFSETS = [0, 48, 64, 32, -16, -40, 0];
 
-/** Calcule l'état d'une leçon selon la progression (déverrouillage séquentiel). */
+/**
+ * Calcule l'état d'une leçon selon la progression (déverrouillage séquentiel).
+ * `currentLessonIndex` = indice de la prochaine leçon à faire (= nombre de
+ * leçons complétées). La leçon à cet indice obtient l'état "current" (rebond
+ * style Duolingo) ; les suivantes sont verrouillées ; les précédentes sont
+ * complétées.
+ */
 function lessonState(
   lesson: Lesson,
   index: number,
-  chain: Lesson[],
+  currentLessonIndex: number,
   completed: string[]
 ): NodeState {
   if (completed.includes(lesson.id)) return "completed";
-  // Première leçon non complétée = current ; les suivantes = locked sauf si la précédente est faite.
-  if (index === 0) return "current";
-  const prevId = chain[index - 1]?.id;
-  return prevId && completed.includes(prevId) ? "unlocked" : "locked";
+  if (index === currentLessonIndex) return "current";
+  // Edge : une leçon antérieure non complétée mais atteignable (ex. progression
+  // non séquentielle) → déverrouillée et tappable, sans rebond.
+  if (index < currentLessonIndex) return "unlocked";
+  return "locked";
 }
 
 export function SkillTree() {
@@ -31,7 +38,7 @@ export function SkillTree() {
   const nodes: SkillNodeData[] = chain.map((l, i) => ({
     lessonId: l.id,
     title: l.title,
-    state: lessonState(l, i, chain, progress.completedLessons),
+    state: lessonState(l, i, progress.currentLessonIndex, progress.completedLessons),
     href: `/lesson/${l.id}`,
   }));
 

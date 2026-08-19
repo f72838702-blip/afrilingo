@@ -36,6 +36,10 @@ export function LessonRunner({ lessonId }: { lessonId: string }) {
 
   const lesson = getLesson(FLAGSHIP_COURSE_ID, lessonId);
 
+  // Rejouer une leçon déjà terminée ? (pas d'XP par bonne réponse pour éviter
+  // le farming infini — la complétion finale est aussi no-op côté XP dans le store).
+  const isReplay = progress.completedLessons.includes(lessonId);
+
   useEffect(() => {
     tickHearts();
   }, []);
@@ -44,12 +48,15 @@ export function LessonRunner({ lessonId }: { lessonId: string }) {
     if (lesson) warmLessonAudio(lesson);
   }, [lesson]);
 
-  // Cœurs à 0 dès l'entrée → game over.
+  // Cœurs à 0 → game over. Reset si les cœurs reviennent (regen) — sinon l'écran
+  // restait collé même avec des cœurs de nouveau disponibles.
   useEffect(() => {
     if (progress.hearts <= 0 && !progress.completedLessons.includes(lessonId)) {
       setGameOver(true);
+    } else if (progress.hearts > 0 && gameOver) {
+      setGameOver(false);
     }
-  }, [progress.hearts, lessonId, progress.completedLessons]);
+  }, [progress.hearts, lessonId, progress.completedLessons, gameOver]);
 
   if (!lesson) {
     return (
@@ -72,7 +79,9 @@ export function LessonRunner({ lessonId }: { lessonId: string }) {
     playSfx(correct ? "correct" : "wrong");
 
     if (correct) {
-      addXp(XP_PER_CORRECT);
+      // Pas d'XP par bonne réponse en replay (anti-farming) — la 1ère
+      // complétion donne déjà XP_PER_CORRECT × bonnes réponses + XP_PER_LESSON.
+      if (!isReplay) addXp(XP_PER_CORRECT);
       awardBadge("first_word");
       // Burst visuel.
       setBurst(true);
@@ -133,9 +142,9 @@ export function LessonRunner({ lessonId }: { lessonId: string }) {
         Exercice {Math.min(index + 1, exercises.length)} / {exercises.length}
       </p>
 
-      {/* Burst XP */}
+      {/* Burst XP (masqué en replay : pas d'XP gagnée) */}
       <div className="relative">
-        <XpBurst amount={XP_PER_CORRECT} show={burst} />
+        <XpBurst amount={XP_PER_CORRECT} show={burst && !isReplay} />
         <div className="pt-6">
           <ExerciseRenderer
             key={current.id}

@@ -17,7 +17,6 @@ import {
   type UserState,
 } from "@/store/useUserStore";
 import { XP_PER_LESSON } from "./constants";
-import { nextStreak } from "./streak";
 
 // ---- Snapshots / subscribe (compatibilité useSyncExternalStore) ----
 
@@ -77,20 +76,9 @@ export function canStartLesson(): boolean {
   return useUserStore.getState().hearts > 0;
 }
 
-export function touchStreak(): void {
-  // Le streak est désormais étendu dans completeLesson ; on expose touchStreak
-  // pour compat, en appliquant la même logique ponctuelle.
-  const p = useUserStore.getState();
-  const { streakDays, lastActiveDate } = nextStreak(p.lastActiveDate, p.streakDays);
-  if (streakDays === p.streakDays && lastActiveDate === p.lastActiveDate) return;
-  useUserStore.setState({
-    streakDays,
-    lastActiveDate,
-    longestStreak: Math.max(p.longestStreak, streakDays),
-  });
-}
+// NOTE : `touchStreak()` a été retiré (code mort). Le streak et le jour actif
+// sont désormais étendus exclusivement dans `completeLesson` (style Duolingo).
 
-/** Complète une leçon (défaut XP_PER_LESSON si xpGained non fourni). */
 export function completeLesson(lessonId: string, xpGained: number = XP_PER_LESSON): void {
   useUserStore.getState().completeLesson(lessonId, xpGained);
 }

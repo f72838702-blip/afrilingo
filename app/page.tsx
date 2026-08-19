@@ -4,12 +4,17 @@
 import { TopBar } from "@/components/top-bar";
 import { SkillTree } from "@/components/skill-tree";
 import { useProgress } from "@/lib/progress-store";
+import { useTodayKey } from "@/lib/use-today-key";
 import { XP_PER_LESSON } from "@/lib/constants";
 import { Nko } from "@/components/direction-text";
 
 export default function Home() {
   const progress = useProgress();
-  const lessonsToday = progress.completedLessons.length; // simplifié : compte total
+  const today = useTodayKey();
+  // Objectif quotidien : ≥1 leçon complétée AUJOURD'HUI (basé sur l'historique
+  // des jours actifs, pas sur le cumul total des leçons). SSR-safe : `today`
+  // est null au 1er render → 0/1 (état neutre, pas de mismatch d'hydration).
+  const lessonsToday = today && progress.activeDates.includes(today) ? 1 : 0;
   const dailyGoal = 1; // 1 leçon / jour
 
   return (

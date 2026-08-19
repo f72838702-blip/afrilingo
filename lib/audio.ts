@@ -1,8 +1,13 @@
 // AfriLingo — audio.
-//  • N'Ko : lecture via fichiers HTML5 (new Audio('/audio/nko/…')) — le composant
-//    <AudioPlayer> s'en charge. AUCUNE synthèse vocale pour le N'Ko (consigne du
-//    projet) : si le fichier manque, feedback visuel (onde) sans erreur console.
-//  • FR (consignes) : speechSynthesis fr-FR autorisé (best-effort, offline).
+//  • N'Ko : priorité au fichier réel HTML5 (new Audio('/audio/nko/…')) via
+//    <AudioPlayer>. En ATTENTE des vrais enregistrements, fallback audible
+//    gratuit et offline : speechSynthesis lit la translittération Latin du mot
+//    (voix fr-FR — approximation honnête, la translittération Manding se lit avec
+//    des valeurs proches du français). Aucun TTS N'Ko/Bambara public n'existe
+//    côté client sans backend/CORS, et cela casserait l'offline-first PWA ;
+//    on fait donc avec ce qu'on a. Quand `url` est défini, le fichier réel
+//    prend la priorité (upgrade path inchangé).
+//  • FR (consignes) : speechSynthesis fr-FR (best-effort, offline).
 //  • SFX leçon : petit son Web Audio pour succès/échec (UI, pas de la parole).
 // data/audio-manifest.ts = source de vérité ; `url` défini → fichier réel.
 // iOS : speechSynthesis/AudioContext doivent être déclenchés par un user gesture
@@ -43,14 +48,24 @@ export function speakFr(text: string, slow = false): void {
   }
 }
 
-/** Joue un audioId FR (synthèse) — utilisé en fallback FR hors du AudioPlayer. */
+/**
+ * Lit un audioId hors du <AudioPlayer> (ex: consigne FR ponctuelle).
+ *  • FR → speechSynthesis fr-FR.
+ *  • N'Ko sans fichier → speechSynthesis lit la translittération Latin (fallback
+ *    audible best-effort en attendant les vrais enregistrements).
+ *  • N'Ko avec fichier → laissé au <AudioPlayer> (HTML5). Pas de lecture ici.
+ */
 export function playAudio(audioId: string, slow = false): void {
   const entry = getAudioEntry(audioId);
   if (!entry) return;
   if (entry.lang === "fr") {
     speakFr(entry.fr ?? entry.latin ?? "", slow);
+    return;
   }
-  // N'Ko : géré par <AudioPlayer> (HTML5). Pas de synthèse ici.
+  // N'Ko : fallback synthèse de la translittération seulement si pas de fichier.
+  if (!entry.url && entry.latin) {
+    speakFr(entry.latin, slow);
+  }
 }
 
 /**
